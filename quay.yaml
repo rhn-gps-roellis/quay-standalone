@@ -1,0 +1,65 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  
+  - name: Create pgsql dir
+    ansible.builtin.file:
+      path: /var/lib/pgsql/data
+      state: directory
+      mode: '0755'
+
+  - name: Create redis dir
+    ansible.builtin.file:
+      path: /var/lib/redis
+      state: directory
+      mode: '0755'
+
+  - name: Create Quay root dir
+    ansible.builtin.file:
+      path: /var/lib/quay
+      state: directory
+      mode: '0755'
+
+  - name: Create a directory if it does not exist
+    ansible.builtin.file:
+      path: /var/lib/quay/storage
+      state: directory
+      mode: '0755'
+
+  - name: Create a directory if it does not exist
+    ansible.builtin.file:
+      path: /var/lib/quay/config
+      state: directory
+      mode: '0755'
+      
+  - name: Set acls on the pgsql dir
+    acl:
+      path: /var/lib/pgsql/data
+      entry: "u:26:-wx"
+      state: present
+
+  - name: Run the pgsql container
+    containers.podman.podman_container:
+      name: postgresql-quay
+      image: registry.redhat.io/rhel8/postgresql-10:1
+      state: started
+      ports: 
+          - "127.0.0.1:5432:5432"
+      env:
+          POSTGRESQL_USER: "quayuser"
+          POSTGRESQL_PASSWORD: "quaypass"
+          POSTGRESQL_DATABASE: "quay"
+          POSTGRESQL_ADMIN_PASSWORD: "adminpass"
+      volume:
+        - /var/lib/pgsql/data:/var/lib/pgsql/data:Z
+
+  - name: Run the redis container
+    containers.podman.podman_container:
+      name: redis
+      image: registry.redhat.io/rhel8/redis-5:1
+      state: started
+      ports:
+              - "127.0.0.1:6379:6349"
+      env:
+          REDIS_PASSWORD: "redispassword"

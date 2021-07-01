@@ -60,6 +60,6 @@
       image: registry.redhat.io/rhel8/redis-5:1
       state: started
       ports:
-              - "127.0.0.1:6379:6349"
+              - "127.0.0.1:6379:6379"
       env:
           REDIS_PASSWORD: "redispassword"

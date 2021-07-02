@@ -1,11 +1,28 @@
 ---
 - hosts: localhost
   gather_facts: no
+  vars:
+    pgsql_dir: "/var/lib/pgsql/data"
+    redis_dir: "/var/lib/pgsql/data"
+    quay_config_dir: "/var/lib/pgsql/data"
+    quay_storage_dir: "/var/lib/pgsql/data"
+
   tasks:
   
+  - name: Create required directories
+    ansible.builtin.file
+      path: '{{ item.dir}}'
+      state: directory
+      mode: '0755'
+      loop:
+        - { dir: '{{ pgsql_dir}}' }
+        - { dir: '{{ redis_dir}}' }
+        - { dir: '{{ quay_config_dir}}' } 
+        - { dir: '{{ quay_storage_dir}}' }
+
   - name: Create pgsql dir
     ansible.builtin.file:
-      path: /var/lib/pgsql/data
+      path: '{{ pgsql_dir }}'
       state: directory
       mode: '0755'
 
